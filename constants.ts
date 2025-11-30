@@ -1,7 +1,6 @@
-
 import { LucideIcon, LayoutDashboard, ShoppingBag, Database, Settings, Activity } from 'lucide-react';
 
-export const APP_NAME = "众拓 TikTok 全自动截流系统";
+export const APP_NAME = "Lami Smart Data Base";
 export const APP_VERSION = "爬虫旗舰版 v5.3";
 
 // Gemini Model Configuration

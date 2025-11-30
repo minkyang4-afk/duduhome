@@ -1,6 +1,7 @@
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ProductData } from '../types';
-import { Download, Search, Trash2, Link as LinkIcon, ShoppingBag, ExternalLink, Filter, X, ChevronDown, FileJson, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
+import { Download, Search, Trash2, Link as LinkIcon, ShoppingBag, ExternalLink, Filter, X, ChevronDown, FileJson, FileSpreadsheet, FileText, Loader2, Check } from 'lucide-react';
 import { PRODUCT_CATEGORIES } from '../constants';
 import * as XLSX from 'xlsx';
 
@@ -8,6 +9,8 @@ interface LeadManagerProps {
   leads: ProductData[]; // Kept prop name as 'leads' in App.tsx but treating as products
   onClear: () => void;
 }
+
+type ExportStatus = 'idle' | 'exporting' | 'success' | 'error';
 
 export const LeadManager: React.FC<LeadManagerProps> = ({ leads: products, onClear }) => {
   // Local Filter States
@@ -19,7 +22,7 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads: products, onCle
 
   // Export UI States
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+  const [exportStatus, setExportStatus] = useState<ExportStatus>('idle');
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
   // Close export menu when clicking outside
@@ -104,24 +107,27 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads: products, onCle
   };
 
   const handleExport = async (format: 'csv' | 'xlsx' | 'json') => {
-    setIsExporting(true);
+    setExportStatus('exporting');
     setShowExportMenu(false);
 
     // Short delay to allow UI to show loading state
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
       const data = getExportData();
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      const filename = `TikTok数据_${timestamp}`;
+      const filename = `TikTok商品数据_${timestamp}`;
 
       if (format === 'csv') {
         const headers = Object.keys(data[0]);
-        const csvContent = "\ufeff" + [ // BOM for Excel
+        // Add BOM for Excel UTF-8 compatibility
+        const csvContent = "\ufeff" + [ 
           headers.join(","),
           ...data.map(row => headers.map(fieldName => {
             const val = row[fieldName as keyof typeof row] || "";
-            return `"${String(val).replace(/"/g, '""')}"`; // Escape quotes
+            // Handle quotes and newlines within fields
+            const escaped = String(val).replace(/"/g, '""'); 
+            return `"${escaped}"`; 
           }).join(","))
         ].join("\n");
         
@@ -137,13 +143,19 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads: products, onCle
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "商品数据");
+        // Adjust column widths automatically (simple heuristic)
+        const wscols = Object.keys(data[0]).map(() => ({ wch: 20 }));
+        worksheet['!cols'] = wscols;
         XLSX.writeFile(workbook, `${filename}.xlsx`);
       }
+      
+      setExportStatus('success');
+      setTimeout(() => setExportStatus('idle'), 2500);
+
     } catch (error) {
       console.error("Export failed:", error);
-      alert("导出失败，请检查数据量或重试。");
-    } finally {
-      setIsExporting(false);
+      setExportStatus('error');
+      setTimeout(() => setExportStatus('idle'), 3000);
     }
   };
 
@@ -176,12 +188,33 @@ export const LeadManager: React.FC<LeadManagerProps> = ({ leads: products, onCle
           <div className="relative" ref={exportMenuRef}>
             <button 
               onClick={() => setShowExportMenu(!showExportMenu)}
-              disabled={products.length === 0 || isExporting}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-emerald-900/20 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] justify-center"
+              disabled={products.length === 0 || exportStatus === 'exporting'}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg min-w-[140px] justify-center
+                ${exportStatus === 'success' 
+                  ? 'bg-emerald-600 text-white shadow-emerald-900/20' 
+                  : exportStatus === 'error'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              {isExporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-              <span>{isExporting ? '导出中...' : '导出数据'}</span>
-              <ChevronDown size={14} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+              {exportStatus === 'exporting' ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : exportStatus === 'success' ? (
+                <Check size={16} />
+              ) : (
+                <Download size={16} />
+              )}
+              
+              <span>
+                {exportStatus === 'exporting' ? '导出中...' 
+                 : exportStatus === 'success' ? '导出成功'
+                 : exportStatus === 'error' ? '导出失败'
+                 : '导出数据'}
+              </span>
+              
+              {exportStatus === 'idle' && (
+                <ChevronDown size={14} className={`transition-transform duration-200 ${showExportMenu ? 'rotate-180' : ''}`} />
+              )}
             </button>
 
             {showExportMenu && (
