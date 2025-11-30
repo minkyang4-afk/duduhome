@@ -1,0 +1,5 @@
+{
+  "name": "众拓 TikTok 全自动截流系统",
+  "description": "基于云端爬虫与Gemini AI的智能电商数据采集系统。支持输入链接自动提取TikTok/抖音商品价格、销量、链接及店铺信息。",
+  "requestFramePermissions": []
+}
