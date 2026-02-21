@@ -1,20 +1,46 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1aCDPxkXxIjDrdwlpvNq-8G1N3rsExYuk
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+mindmap
+  root((智能错题本<br/>SaaS平台<br/>MVP架构))
+    商业战略与定位
+      降维打击: 补习班审计外挂
+      盈利模型: 阶梯定价
+        引流基础版: 驱动UGC飞轮
+        尊享私教版: 考前靶向组卷
+      核心护城河
+        错题加解析双传机制
+        本土化四级教研标签库
+    核心业务流
+      1. 前置分发
+        选项A: 完全没思路 交白卷
+        选项B: 步骤卡壳 求找茬
+      2. 鹰眼诊断
+        AI化身Diff比对器找断层
+        输出唯一规范知识点ID
+      3. 飞书调度
+        点亮学情看板红灯
+        挂载艾宾浩斯复习时间戳
+      4. 闭环交付
+        考前捞取薄弱红绿灯
+        生成定制化PDF变体冲刺卷
+    全栈技术架构
+      计算大脑: Node.js 应用后端
+      数据底座
+        前期极速试错: 飞书多维表格 Bitable
+        后期高并发迁徙: 云托管 PostgreSQL
+      静态资源: OSS对象存储 加 CDN加速
+      AI路由池
+        豆包1.5Pro Vision: 核心视觉与OCR提取
+        Qwen-3等模型: 复杂逻辑与文科精批
+    核心数据库表结构
+      表A: 四级教研知识树字典 The Truth
+      表B: UGC生肉草稿与清洗池
+      表C: 带有JSON动态变量的黄金母题库
+      表D: 用户学情与复习排期追踪表
+    大模型风控与约束
+      强制输出: 代码级锁死Function Calling
+      文理分科隔离
+        理科绝对红线: 严禁AI看图盲算
+        理科降级处理: 依托解析本做逻辑比对
+        文科高溢价: 放开生成名师级作文精批
+      异常兜底
+        无答案情况仅打宏观考点标签
+        UI界面强制全屏免责声明
